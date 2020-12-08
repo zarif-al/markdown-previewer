@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useReducer} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFreeCodeCamp } from '@fortawesome/free-brands-svg-icons'
 import { faExpand, faCompress} from '@fortawesome/free-solid-svg-icons'
@@ -6,68 +6,97 @@ import marked from 'marked'
 import primaryContent from './primaryContent';
 import './App.css';
 
+ const reducer = (state, action) => {
+
+   if(action.type === 'maxEditor'){
+     return {
+       ...state, 
+       displayMaxBtnState : 'none', 
+       displayMinBtnState : 'inline', 
+       editorWrapState : 'editorWrap-maximize',
+       displayPreviewState : 'none'
+      }
+   }
+   
+   if(action.type === 'minEditor'){
+      return {
+        ...state,
+        displayMaxBtnState : 'inline', 
+        displayMinBtnState : 'none', 
+        editorWrapState : 'editorWrap',
+        displayPreviewState : 'flex'
+      }
+   }
+   
+   if(action.type === 'updatePreview'){
+     return {
+       ...state,
+       editorContent : action.param
+     }
+   }
+   
+   if(action.type === 'maxRender'){
+     return {
+        ...state, 
+        renderState : 'render-maximize',
+        displayEditorState : 'none',
+        displayMaxBtnState : 'none', 
+        displayMinBtnState : 'inline', 
+      }
+   }
+   
+   if(action.type === 'minRender'){
+      return {
+        ...state, 
+        renderState : 'render',
+        displayEditorState : 'flex',
+        displayMaxBtnState : 'inline', 
+        displayMinBtnState : 'none', 
+      }
+   }
+
+   throw new Error('No action received')
+   
+ };
+
+  const defaultState = {
+    editorWrapState : 'editorWrap',
+    displayMinBtnState : 'none',
+    displayMaxBtnState : 'inline',
+    editorContent : primaryContent,
+    displayEditorState : 'flex',
+    displayPreviewState : 'flex',
+    renderState : 'render'
+  };
 
 function App() {
-  const [editorWrap, setEditorWrap] = useState('editorWrap');
-  const [render, setRender] = useState('render')
-  const [displayMaxBtn, setDisplayMax] = useState('inline');
-  const [displayMinBtn, setDisplayMin] = useState('none');
-  const [edtorContent, setContent] = useState(primaryContent);
-  const [displayEditor, setDisplayEditor] = useState('flex');
-  const [displayPreview, setDisplayPreview] = useState('flex');
+  const [state, dispatch] = useReducer(reducer, defaultState);
 
   marked.setOptions({
     breaks : true,
   })
 
-  const Resize = (num) => {
-  if(num === 1){
-    setEditorWrap('editorWrap-maximize');
-    setDisplayMin('inline');
-    setDisplayMax('none');
-    setDisplayPreview('none');
-  }
-  if(num === 2){
-    setEditorWrap('editorWrap');
-    setDisplayMin('none');
-    setDisplayMax('inline');
-    setDisplayPreview('flex');
-  }
-  if(num === 3){
-    setRender('render-maximize');
-    setDisplayMin('inline');
-    setDisplayMax('none');
-    setDisplayEditor('none');
-  }
-  if(num === 4){
-    setRender('render');
-    setDisplayMin('none');
-    setDisplayMax('inline');
-    setDisplayEditor('flex');
-  }
-  }
-
   return (
     <div className="App">
-      <div className={editorWrap} style={{display : displayEditor}}>
+      <div className={state.editorWrapState} style={{display : state.displayEditorState}}>
           <div className="toolbar">
-            <div class="toolbarHeading">
+            <div className="toolbarHeading">
             <FontAwesomeIcon icon={faFreeCodeCamp}></FontAwesomeIcon>Editor
             </div>
-            <FontAwesomeIcon icon={faExpand} onClick={()=>{Resize(1)}} style={{display : displayMaxBtn}}></FontAwesomeIcon>    
-            <FontAwesomeIcon icon={faCompress} onClick={()=>{Resize(2)}} style={{display : displayMinBtn}}></FontAwesomeIcon>
+            <FontAwesomeIcon icon={faExpand} onClick={ ()=>{dispatch({type : 'maxEditor'})} } style={{display : state.displayMaxBtnState}}></FontAwesomeIcon>    
+            <FontAwesomeIcon icon={faCompress}  onClick={ ()=>{dispatch({type : 'minEditor'})} }  style={{display : state.displayMinBtnState}}></FontAwesomeIcon>
           </div>
-          <textarea id="editor" type="text" value={edtorContent}  onChange={(e)=>{setContent(e.target.value)}}>
+          <textarea id="editor" type="text" value={state.editorContent}   onChange={ (e)=>{ dispatch({type : 'updatePreview', param : e.target.value}) } } >
           </textarea>
       </div>
-      <div className={render} style={{display : displayPreview}}>
-            <div className="toolbar"><div class="toolbarHeading">
+      <div className={state.renderState} style={{display : state.displayPreviewState}}>
+            <div className="toolbar"><div className="toolbarHeading">
             <FontAwesomeIcon icon={faFreeCodeCamp}></FontAwesomeIcon>Markdown Previewer
             </div>
-            <FontAwesomeIcon icon={faExpand} onClick={()=>{Resize(3)}} style={{display : displayMaxBtn}}></FontAwesomeIcon>
-            <FontAwesomeIcon icon={faCompress} onClick={()=>{Resize(4)}} style={{display : displayMinBtn}}></FontAwesomeIcon>
+            <FontAwesomeIcon icon={faExpand}  onClick={ ()=>{dispatch({type : 'maxRender'})} }  style={{display : state.displayMaxBtnState}}></FontAwesomeIcon>
+            <FontAwesomeIcon icon={faCompress}  onClick={ ()=>{dispatch({type : 'minRender'})} }  style={{display : state.displayMinBtnState}}></FontAwesomeIcon>
           </div>
-        <div className="preview" id="preview" dangerouslySetInnerHTML={{__html: marked(edtorContent)}}></div>   
+        <div className="preview" id="preview" dangerouslySetInnerHTML={{__html: marked(state.editorContent)}}></div>   
       </div>
     </div>
   );
