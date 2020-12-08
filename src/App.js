@@ -96,7 +96,7 @@ function App() {
             <FontAwesomeIcon icon={faFreeCodeCamp}></FontAwesomeIcon>Markdown Previewer
             </div>
             <FontAwesomeIcon icon={faExpand}  onClick={ ()=>{dispatch({type : 'maxRender'})} }  style={{display : state.displayMaxBtnState}}></FontAwesomeIcon>
-            <FontAwesomeIcon icon={faCompress}  onClick={ ()=>{dispatch({type : 'min'})} }  style={{display : state.displayMinBtnState}}></FontAwesomeIcon>
+            <FontAwesomeIcon icon={faCompress}  onClick={ ()=>{dispatch({type : 'minRender'})} }  style={{display : state.displayMinBtnState}}></FontAwesomeIcon>
           </div>
         <div className="preview" id="preview" dangerouslySetInnerHTML={{__html: marked(state.editorContent)}}></div>   
       </div>
